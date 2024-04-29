@@ -1,0 +1,176 @@
+﻿<Window x:Class="CheckerBoard.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:CheckerBoard.ViewModels"
+        xmlns:conv="clr-namespace:CheckerBoard.Converters"
+        mc:Ignorable="d" 
+        Title="MainWindow" Height="750" Width="1200">
+
+    <Window.DataContext>
+        <vm:BoardViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <conv:BoolToBrushValueConverter x:Key="BoolToBrushConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1.7*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Menu Grid.Row="0" Background="White">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New Game" Command="{Binding NewGameCommand}"/>
+                <MenuItem Header="_Save" Command="{Binding SaveGameCommand}"/>
+                <MenuItem Header="_Open" Command="{Binding LoadGameCommand}"/>
+                <MenuItem Header="_Allow Multiple Jumps" Command="{Binding MultipleJumpCommand}"/>
+                <MenuItem Header="_Statistics" Command="{Binding DisplayStatisticsCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Command="{Binding DisplayInfoCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding GameModel.HasMultipleJumps}" Content="Allow Multiple Jumps" Margin="227,21,185,83" IsEnabled="{Binding GameModel.IsGameNotInProgress}"/>
+
+        <ItemsControl
+            ItemsSource="{Binding GameModel.Cells}" 
+            Background="Gray"
+            Grid.Row="1"
+            Grid.Column="1"
+            BorderThickness="6"
+            BorderBrush="Black"
+            >
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="8" Columns="8"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Command="{Binding DataContext.ClickCellCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                        CommandParameter="{Binding}">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border Width="65"
+                                            Height="65"
+                                            Background="{Binding IsBlack, Converter={StaticResource BoolToBrushConverter}}"
+                                            >
+                                    <ContentControl>
+                                        <ContentControl.Style>
+
+                                            <Style TargetType="ContentControl">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Content}" Value="WhitePawn">
+                                                        <Setter Property="Content">
+                                                            <Setter.Value>
+                                                                <Ellipse Fill="DarkGray"
+                                                                         Width="35"
+                                                                         Height="35"
+                                                                         HorizontalAlignment="Center"
+                                                                         VerticalAlignment="Center"
+                                                                    />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+
+                                                    <DataTrigger Binding="{Binding Content}" Value="BlackPawn">
+                                                        <Setter Property="Content">
+                                                            <Setter.Value>
+                                                                <Ellipse Fill="Black"
+                                                                     Width="35"
+                                                                     Height="35"
+                                                                     HorizontalAlignment="Center"
+                                                                     VerticalAlignment="Center"
+                                                                />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+
+                                                    <DataTrigger Binding="{Binding Content}" Value="BlackKing">
+                                                        <Setter Property="Content">
+                                                            <Setter.Value>
+                                                                <Canvas Width="100" Height="100" Margin="3 0 0 0">
+                                                                    <Ellipse Fill="Black" Width="35" Height="35" Canvas.Left="12.5" Canvas.Top="13"/>
+                                                                    <Polygon Fill="Gold" Points="32.5,20 47.5,20 35,5"/>
+                                                                    <Polygon Fill="Gold" Points="22.5,20 37.5,20 30,5"/>
+                                                                    <Polygon Fill="Gold" Points="12.5,20 27.5,20 20,5"/>
+                                                                </Canvas>
+
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+
+
+
+                                                    <DataTrigger Binding="{Binding Content}" Value="WhiteKing">
+                                                        <Setter Property="Content">
+                                                            <Setter.Value>
+                                                                <Canvas Width="100" Height="100" Margin="3 0 0 0">
+                                                                    <Ellipse Fill="DarkGray" Width="35" Height="35" Canvas.Left="12.5" Canvas.Top="13"/>
+                                                                    <Polygon Fill="Gold" Points="32.5,20 47.5,20 35,5"/>
+                                                                    <Polygon Fill="Gold" Points="22.5,20 37.5,20 30,5"/>
+                                                                    <Polygon Fill="Gold" Points="12.5,20 27.5,20 20,5"/>
+                                                                </Canvas>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+
+
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContentControl.Style>
+                                    </ContentControl>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <StackPanel  Grid.Row="2" Orientation="Vertical" HorizontalAlignment="Left" Grid.Column="1" Margin="227,2,0,-2">
+            <TextBlock Text="Current Player: "/>
+            <TextBlock Text="{Binding GameModel.CurrentPlayer}" FontWeight="Bold"/>
+        </StackPanel>
+
+        <!-- Adăugăm numărul de piese pentru fiecare jucător -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="1" Margin="108,2,0,-2">
+            <TextBlock Text="Black Pieces: "/>
+            <TextBlock Text="{Binding GameModel.BlackPieceCount}" FontWeight="Bold"/>
+            <TextBlock Text="                                             White Pieces: "/>
+            <TextBlock Text="{Binding GameModel.WhitePieceCount}" FontWeight="Bold"/>
+
+        </StackPanel>
+        <StackPanel Margin="135,39,93,0" Grid.Column="1">
+            <TextBlock Text="Black Wins:" Width="64"/>
+            <TextBlock Text="{Binding GameModel.BlackWins}" FontWeight="Bold" Width="59" TextAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="0.383"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+            <TextBlock Text="White Wins:" Width="64" TextAlignment="Center"/>
+            <TextBlock Text="{Binding GameModel.WhiteWins}" FontWeight="Bold" Width="74" TextAlignment="Center"/>
+        </StackPanel>
+
+
+    </Grid>
+
+</Window>
